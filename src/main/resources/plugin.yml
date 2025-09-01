@@ -1,0 +1,13 @@
+name: feurixeconomy
+version: '${project.version}'
+main: ru.bivashka.feurixeconomy.FeurixEconomy
+api-version: '1.16'
+commands:
+  rubles:
+    description: Управление валютой Feurix (рубли)
+    usage: /rubles
+    aliases: [money, bal]
+permissions:
+  feurixeconomy.admin:
+    description: Управление чужим балансом
+    default: op

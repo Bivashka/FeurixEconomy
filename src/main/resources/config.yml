@@ -1,0 +1,18 @@
+database:
+  host: "localhost"
+  port: 3306
+  name: "fmcc"
+  user: "root"
+  password: ""
+  pool-size: 10
+
+messages:
+  balance: "&eВаш баланс: &a{amount}₽"
+  balance-other: "&eБаланс игрока {player}: &a{amount}₽"
+  given: "&aВы выдали {amount}₽ игроку {player}"
+  taken: "&cВы забрали {amount}₽ у игрока {player}"
+  set: "&eВы установили {amount}₽ игроку {player}"
+  pay-success: "&aВы перевели {amount}₽ игроку {player}"
+  pay-received: "&aВы получили {amount}₽ от игрока {player}"
+  not-enough: "&cУ вас недостаточно средств!"
+  player-not-found: "&cИгрок не найден!"
