@@ -8,6 +8,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import ru.bivashka.feurixeconomy.FeurixEconomy;
+import ru.bivashka.feurixeconomy.economy.EconomyProvider.TransferResult;
+
+import java.util.logging.Level;
 
 public class RublesCommand implements CommandExecutor {
 
@@ -19,6 +22,16 @@ public class RublesCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        try {
+            return handleCommand(sender, args);
+        } catch (IllegalStateException e) {
+            plugin.getLogger().log(Level.SEVERE, "Economy operation failed", e);
+            sender.sendMessage(color("&cОперация не выполнена. Сообщите администратору сервера."));
+            return true;
+        }
+    }
+
+    private boolean handleCommand(CommandSender sender, String[] args) {
         // /rubles
         if (args.length == 0) {
             if (sender instanceof Player) {
@@ -89,20 +102,29 @@ public class RublesCommand implements CommandExecutor {
                 long amount = parseAmount(args[2], sender);
                 if (amount < 0) return true;
 
-                long current = plugin.getEconomy().getBalance(player.getName());
-                if (current < amount) {
-                    player.sendMessage(color("&cУ вас недостаточно средств!"));
-                    return true;
+                TransferResult result = plugin.getEconomy().transfer(player.getName(), target.getName(), amount);
+                switch (result) {
+                    case INVALID_AMOUNT:
+                        player.sendMessage(color("&cСумма перевода должна быть больше нуля."));
+                        return true;
+                    case SAME_ACCOUNT:
+                        player.sendMessage(color("&cНельзя переводить рубли самому себе."));
+                        return true;
+                    case INSUFFICIENT_FUNDS:
+                        player.sendMessage(color("&cУ вас недостаточно средств!"));
+                        return true;
+                    case RECIPIENT_UNAVAILABLE:
+                        player.sendMessage(color("&cПолучатель не найден в базе или его баланс переполнен."));
+                        return true;
+                    case SUCCESS:
+                        player.sendMessage(color("&aВы перевели " + amount + "₽ игроку " + target.getName()));
+                        if (target.isOnline()) {
+                            target.getPlayer().sendMessage(color("&aВы получили " + amount + "₽ от " + player.getName()));
+                        }
+                        return true;
+                    default:
+                        throw new IllegalStateException("Unknown transfer result: " + result);
                 }
-
-                plugin.getEconomy().takeBalance(player.getName(), amount);
-                plugin.getEconomy().addBalance(target.getName(), amount);
-
-                player.sendMessage(color("&aВы перевели " + amount + "₽ игроку " + target.getName()));
-                if (target.isOnline()) {
-                    target.getPlayer().sendMessage(color("&aВы получили " + amount + "₽ от " + player.getName()));
-                }
-                return true;
             }
         }
 
