@@ -28,6 +28,10 @@ public class DatabaseManager {
         this.dataSource = new HikariDataSource(config);
     }
 
+    public javax.sql.DataSource getDataSource() {
+        return dataSource;
+    }
+
     public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
